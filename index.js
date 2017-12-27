@@ -1,7 +1,7 @@
 const NUM_LEDS = 100;
 // const GPIO_PIN = 13;
 
-let strip = require('rpi-ws281x-native');
+let ws281x = require('rpi-ws281x-native');
 ws281x.init(NUM_LEDS);
 
 const pixelData = new Uint32Array(NUM_LEDS);
