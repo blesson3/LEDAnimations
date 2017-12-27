@@ -5,4 +5,4 @@ let strip = require('rpi-ws281x-native');
 strip.init(NUM_LEDS, { gpio: GPIO_PIN });
 
 // Two red pixels
-strip.render([ 16711680, 16711680 ]);
+strip.render([ 0xff0000, 0xff0000 ]);
