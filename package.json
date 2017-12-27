@@ -1,0 +1,22 @@
+{
+  "name": "ledanimations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blesson3/LEDAnimations.git"
+  },
+  "author": "Matt Blessed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/blesson3/LEDAnimations/issues"
+  },
+  "homepage": "https://github.com/blesson3/LEDAnimations#readme",
+  "dependencies": {
+    "rpi-ws281x-native": "^0.8.2"
+  }
+}
