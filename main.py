@@ -16,7 +16,9 @@ def signal_handler(signal, frame):
 
 def opt_parse():
         parser = argparse.ArgumentParser()
-        parser.add_argument('-c', action='store_true', help='color')
+        parser.add_argument('-r', action='store_true', help='color')
+        parser.add_argument('-g', action='store_true', help='color')
+        parser.add_argument('-b', action='store_true', help='color')
         args = parser.parse_args()
         signal.signal(signal.SIGINT, signal_handler)
         return args
@@ -101,11 +103,11 @@ if __name__ == '__main__':
 	# Intialize the library (must be called once before other functions).
 	strip.begin()
 
-	if args.c == 'red':
+	if args.r:
   		color = Color(255,0,0)
-	elif args.c == 'green':
+	elif args.g:
 		color = Color(0,255,0)
-	elif args.c == 'blue':
+	elif args.b:
   		color = Color(0,0,255)
 
 	colorWipe(strip, color, wait_ms=100)  # Red wipe
