@@ -1,7 +1,9 @@
 const NUM_LEDS = 10;
 // const GPIO_PIN = 13;
 
-const hsl = require('hsl-to-hex')
+const parseRGB = require("pure-color/parse");
+const hsl2rgb = require("pure-color/convert/hsl2rgb");
+const rgb2hex = require("pure-color/convert/rgb2hex");
 
 let ws281x = require('rpi-ws281x-native');
 ws281x.init(NUM_LEDS);
@@ -18,7 +20,7 @@ let hue = 0;
 
 // ---- animation-loop
 setInterval(function () {
-  let color = hsl(hue, 360, 150); // 360 is max
+  let color = rgb2hex(hsl2rgb([hue, 360, 180]));
   let rgbNumber = parseInt(color.slice(1), 16);
   for (let i = 0; i < NUM_LEDS; i++) {
     pixelData[i] = rgbNumber;
