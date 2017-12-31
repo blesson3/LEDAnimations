@@ -22,7 +22,7 @@ def opt_parse():
                 signal.signal(signal.SIGINT, signal_handler)
 
 # LED strip configuration:
-LED_COUNT      = 20      # Number of LED pixels.
+LED_COUNT      = 10      # Number of LED pixels.
 LED_PIN        = 13      # GPIO pin connected to the pixels (18 uses PWM!).
 #LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
@@ -105,8 +105,8 @@ if __name__ == '__main__':
 	while True:
 		print ('Color wipe animations.')
 		colorWipe(strip, Color(255, 0, 0), wait_ms=100)  # Red wipe
-		colorWipe(strip, Color(0, 255, 0), wait_ms=100)  # Blue wipe
-		colorWipe(strip, Color(0, 0, 255), wait_ms=100)  # Green wipe
+		# colorWipe(strip, Color(0, 255, 0), wait_ms=100)  # Blue wipe
+		# colorWipe(strip, Color(0, 0, 255), wait_ms=100)  # Green wipe
 		# print ('Theater chase animations.')
 		# theaterChase(strip, Color(127, 127, 127))  # White theater chase
 		# theaterChase(strip, Color(127,   0,   0))  # Red theater chase
