@@ -16,10 +16,10 @@ def signal_handler(signal, frame):
 
 def opt_parse():
         parser = argparse.ArgumentParser()
-        parser.add_argument('-c', action='store_true', help='clear the display on exit')
+        parser.add_argument('-c', action='store_true', help='color')
         args = parser.parse_args()
-        if args.c:
-                signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGINT, signal_handler)
+        return args
 
 # LED strip configuration:
 LED_COUNT      = 10      # Number of LED pixels.
@@ -94,19 +94,28 @@ def theaterChaseRainbow(strip, wait_ms=50):
 # Main program logic follows:
 if __name__ == '__main__':
         # Process arguments
-        opt_parse()
+        args = opt_parse()
 
 	# Create NeoPixel object with appropriate configuration.
 	strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
 	# Intialize the library (must be called once before other functions).
 	strip.begin()
 
-	print ('Press Ctrl-C to quit.')
-	while True:
-		print ('Color wipe animations.')
-		colorWipe(strip, Color(255, 0, 0), wait_ms=100)  # Red wipe
-		colorWipe(strip, Color(0, 255, 0), wait_ms=100)  # Blue wipe
-		colorWipe(strip, Color(0, 0, 255), wait_ms=100)  # Green wipe
+	if args.c == 'red':
+  		color = Color(255,0,0)
+	elif args.c == 'green':
+		color = Color(0,255,0)
+	elif args.c == 'blue':
+  		color = Color(0,0,255)
+
+	colorWipe(strip, color, wait_ms=100)  # Red wipe
+
+	# print ('Press Ctrl-C to quit.')
+	# while True:
+	# 	print ('Color wipe animations.')
+	# 	colorWipe(strip, color, wait_ms=100)  # Red wipe
+		# colorWipe(strip, Color(0, 255, 0), wait_ms=100)  # Blue wipe
+		# colorWipe(strip, Color(0, 0, 255), wait_ms=100)  # Green wipe
 		# print ('Theater chase animations.')
 		# theaterChase(strip, Color(127, 127, 127))  # White theater chase
 		# theaterChase(strip, Color(127,   0,   0))  # Red theater chase
