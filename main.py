@@ -1,208 +1,120 @@
-# me is this DAT.
-# 
-# dat is the changed DAT.
-# rows is a list of row indices.
-# cols is a list of column indices.
-# cells is the list of cells that have changed content.
-# prev is the list of previous string contents of the changed cells.
-# 
-# Make sure the corresponding toggle is enabled in the DAT Execute DAT.
-# 
-# If rows or columns are deleted, sizeChange will be called instead of row/col/cellChange.
-
-
-
-
-# Code: https://github.com/zestyping/openpixelcontrol/blob/master/python/opc.py
-
-import socket
-import struct
-import sys
-
-SET_PIXEL_COLOURS = 0  # "Set pixel colours" command (see openpixelcontrol.org)
-
-
-class Client(object):
-    def __init__(self, server_ip_port, long_connection=True, verbose=False):
-        """Create an OPC client object which sends pixels to an OPC server.
-        server_ip_port should be an ip:port or hostname:port as a single string.
-        For example: '127.0.0.1:7890' or 'localhost:7890'
-        There are two connection modes:
-        * In long connection mode, we try to maintain a single long-lived
-          connection to the server.  If that connection is lost we will try to
-          create a new one whenever put_pixels is called.  This mode is best
-          when there's high latency or very high framerates.
-        * In short connection mode, we open a connection when it's needed and
-          close it immediately after.  This means creating a connection for each
-          call to put_pixels. Keeping the connection usually closed makes it
-          possible for others to also connect to the server.
-        A connection is not established during __init__.  To check if a
-        connection will succeed, use can_connect().
-        If verbose is True, the client will print debugging info to the console.
-        """
-        self.verbose = verbose
-
-        self._long_connection = long_connection
-
-        self._ip, self._port = server_ip_port.split(':')
-        self._port = int(self._port)
-
-        self._socket = None  # will be None when we're not connected
-
-    def _debug(self, m):
-        if self.verbose:
-            print('    %s' % str(m))
-
-    def _ensure_connected(self):
-        """Set up a connection if one doesn't already exist.
-        Return True on success or False on failure.
-        """
-        if self._socket:
-            self._debug('_ensure_connected: already connected, doing nothing')
-            return True
-
-        try:
-            self._debug('_ensure_connected: trying to connect...')
-            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self._socket.settimeout(1)
-            self._socket.connect((self._ip, self._port))
-            self._debug('_ensure_connected:    ...success')
-            return True
-        except socket.error:
-            self._debug('_ensure_connected:    ...failure')
-            self._socket = None
-            return False
-
-    def disconnect(self):
-        """Drop the connection to the server, if there is one."""
-        self._debug('disconnecting')
-        if self._socket:
-            self._socket.close()
-        self._socket = None
-
-    def can_connect(self):
-        """Try to connect to the server.
-        Return True on success or False on failure.
-        If in long connection mode, this connection will be kept and re-used for
-        subsequent put_pixels calls.
-        """
-        success = self._ensure_connected()
-        if not self._long_connection:
-            self.disconnect()
-        return success
-
-    def put_pixels(self, pixels, channel=0):
-        """Send the list of pixel colors to the OPC server on the given channel.
-        channel: Which strand of lights to send the pixel colors to.
-            Must be an int in the range 0-255 inclusive.
-            0 is a special value which means "all channels".
-        pixels: A list of 3-tuples representing rgb colors.
-            Each value in the tuple should be in the range 0-255 inclusive. 
-            For example: [(255, 255, 255), (0, 0, 0), (127, 0, 0)]
-            Floats will be rounded down to integers.
-            Values outside the legal range will be clamped.
-        Will establish a connection to the server as needed.
-        On successful transmission of pixels, return True.
-        On failure (bad connection), return False.
-        The list of pixel colors will be applied to the LED string starting
-        with the first LED.  It's not possible to send a color just to one
-        LED at a time (unless it's the first one).
-        """
-        self._debug('put_pixels: connecting')
-        is_connected = self._ensure_connected()
-        if not is_connected:
-            self._debug('put_pixels: not connected.  ignoring these pixels.')
-            return False
-
-        # build OPC message
-        command = SET_PIXEL_COLOURS
-        header = struct.pack('>BBH', channel, SET_PIXEL_COLOURS, len(pixels)*3)
-        pieces = [struct.pack(
-                      'BBB',
-                      min(255, max(0, int(r))),
-                      min(255, max(0, int(g))),
-                      min(255, max(0, int(b)))
-                  ) for r, g, b in pixels]
-        if bytes is str:
-            message = header + ''.join(pieces)
-        else:
-            message = header + b''.join(pieces)
-
-        self._debug('put_pixels: sending pixels to server')
-        try:
-            self._socket.send(message)
-        except socket.error:
-            self._debug('put_pixels: connection lost.  could not send pixels.')
-            self._socket = None
-            return False
-
-        if not self._long_connection:
-            self._debug('put_pixels: disconnecting')
-            self.disconnect()
-
-        return True
-
-
-
+# NeoPixel library strandtest example
+# Author: Tony DiCola (tony@tonydicola.com)
+#
+# Direct port of the Arduino NeoPixel library strandtest example.  Showcases
+# various animations on a strip of NeoPixels.
 import time
-import colorsys
 
-def glow():
-  # Turn all pixels on to the same color and then 
-  # change the amplitude of that color
+from neopixel import *
 
-  rgb = 0
-  i = 0
-  
-  while True:
-    i += 0.1
-    rgb = colorsys.hsv_to_rgb(i % 1.0,1,0.3)
-    print(rgb)
-    for j in range(0,len(all_pixels)):
-      all_pixels[j] = (int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
-    print(all_pixels)
-    client.put_pixels(all_pixels, channel=0)
-    time.sleep(0.2)
-    
+import argparse
+import signal
+import sys
+def signal_handler(signal, frame):
+        colorWipe(strip, Color(0,0,0))
+        sys.exit(0)
 
-def chasing_ball():
-  i = 0
-  brightness = 200
-  a = 1
-  b = 0
-  c = 0
-  while True:
-    i += 1
-    
-    if i % len(all_pixels) == 0:
-      if a:
-        a = 0
-        b = 1
-      elif b:
-        b = 0
-        c = 1
-      elif c:
-        c = 0
-        a = 1
-        
+def opt_parse():
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-c', action='store_true', help='clear the display on exit')
+        args = parser.parse_args()
+        if args.c:
+                signal.signal(signal.SIGINT, signal_handler)
 
-    for j in range(0,len(all_pixels)):
-      all_pixels[j] = (0,0,0)
-
-    all_pixels[i % len(all_pixels)] = (a*brightness, b*brightness, c*brightness)
-
-    client.put_pixels(all_pixels, channel=0)
-    time.sleep(0.1)
+# LED strip configuration:
+LED_COUNT      = 20      # Number of LED pixels.
+LED_PIN        = 13      # GPIO pin connected to the pixels (18 uses PWM!).
+#LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 100     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+LED_CHANNEL    = 1       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 
 
-all_pixels = [];
-for i in range(0,200):
-    all_pixels.append((0,0,0))
 
+# Define functions which animate LEDs in various ways.
+def colorWipe(strip, color, wait_ms=50):
+	"""Wipe color across display a pixel at a time."""
+	for i in range(strip.numPixels()):
+		strip.setPixelColor(i, color)
+		strip.show()
+		time.sleep(wait_ms/1000.0)
 
-client = Client('raspberrypi.local:7890')
-client.can_connect()
+def theaterChase(strip, color, wait_ms=50, iterations=10):
+	"""Movie theater light style chaser animation."""
+	for j in range(iterations):
+		for q in range(3):
+			for i in range(0, strip.numPixels(), 3):
+				strip.setPixelColor(i+q, color)
+			strip.show()
+			time.sleep(wait_ms/1000.0)
+			for i in range(0, strip.numPixels(), 3):
+				strip.setPixelColor(i+q, 0)
 
-glow()
+def wheel(pos):
+	"""Generate rainbow colors across 0-255 positions."""
+	if pos < 85:
+		return Color(pos * 3, 255 - pos * 3, 0)
+	elif pos < 170:
+		pos -= 85
+		return Color(255 - pos * 3, 0, pos * 3)
+	else:
+		pos -= 170
+		return Color(0, pos * 3, 255 - pos * 3)
 
-client.disconnect()
+def rainbow(strip, wait_ms=20, iterations=1):
+	"""Draw rainbow that fades across all pixels at once."""
+	for j in range(256*iterations):
+		for i in range(strip.numPixels()):
+			strip.setPixelColor(i, wheel((i+j) & 255))
+		strip.show()
+		time.sleep(wait_ms/1000.0)
+
+def rainbowCycle(strip, wait_ms=20, iterations=5):
+	"""Draw rainbow that uniformly distributes itself across all pixels."""
+	for j in range(256*iterations):
+		for i in range(strip.numPixels()):
+			strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
+		strip.show()
+		time.sleep(wait_ms/1000.0)
+
+def theaterChaseRainbow(strip, wait_ms=50):
+	"""Rainbow movie theater light style chaser animation."""
+	for j in range(256):
+		for q in range(3):
+			for i in range(0, strip.numPixels(), 3):
+				strip.setPixelColor(i+q, wheel((i+j) % 255))
+			strip.show()
+			time.sleep(wait_ms/1000.0)
+			for i in range(0, strip.numPixels(), 3):
+				strip.setPixelColor(i+q, 0)
+
+# Main program logic follows:
+if __name__ == '__main__':
+        # Process arguments
+        opt_parse()
+
+	# Create NeoPixel object with appropriate configuration.
+	strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
+	# Intialize the library (must be called once before other functions).
+	strip.begin()
+
+	print ('Press Ctrl-C to quit.')
+	while True:
+		print ('Color wipe animations.')
+    print ('Red')
+		colorWipe(strip, Color(255, 0, 0), wait_ms=100)  # Red wipe
+    print ('Blue')
+		colorWipe(strip, Color(0, 255, 0), wait_ms=100)  # Blue wipe
+    print ('Green')
+		colorWipe(strip, Color(0, 0, 255), wait_ms=100)  # Green wipe
+		# print ('Theater chase animations.')
+		# theaterChase(strip, Color(127, 127, 127))  # White theater chase
+		# theaterChase(strip, Color(127,   0,   0))  # Red theater chase
+		# theaterChase(strip, Color(  0,   0, 127))  # Blue theater chase
+		# print ('Rainbow animations.')
+		# rainbow(strip)
+		# rainbowCycle(strip)
+		# theaterChaseRainbow(strip)
