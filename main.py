@@ -104,11 +104,8 @@ if __name__ == '__main__':
 	print ('Press Ctrl-C to quit.')
 	while True:
 		print ('Color wipe animations.')
-    print ('Red')
 		colorWipe(strip, Color(255, 0, 0), wait_ms=100)  # Red wipe
-    print ('Blue')
 		colorWipe(strip, Color(0, 255, 0), wait_ms=100)  # Blue wipe
-    print ('Green')
 		colorWipe(strip, Color(0, 0, 255), wait_ms=100)  # Green wipe
 		# print ('Theater chase animations.')
 		# theaterChase(strip, Color(127, 127, 127))  # White theater chase
