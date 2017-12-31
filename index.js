@@ -31,6 +31,6 @@ setInterval(function () {
   ws281x.render(pixelData);
 
   // rotate
-  hue += 5;
+  hue += 1;
   hue = hue % 361;
 }, 120);
