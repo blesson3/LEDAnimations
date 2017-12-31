@@ -24,7 +24,7 @@ setInterval(function () {
     pixelData[i] = rgbNumber;
   }
 
-  console.log('Setting color: '+rgbNumber+' hue: '+hue);
+  console.log('Setting color: '+rgbNumber+' hue: '+hue+' color: '+color);
 
   ws281x.render(pixelData);
 
