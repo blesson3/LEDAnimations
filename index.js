@@ -19,15 +19,15 @@ let ledColor = Color.rgb(80, 80, 80)
 // ---- animation-loop
 let offset = 1;
 setInterval(function () {
+  let color = ledColor.rotate(offset);
   for (let i = 0; i < NUM_LEDS; i++) {
-    pixelData[i] = ledColor.rgbNumber();
+    pixelData[i] = color.rgbNumber();
   }
 
-  console.log('Setting color: '+ledColor.rgbNumber());
+  console.log('Setting color: '+color.rgbNumber()+' offset: '+offset);
 
   ws281x.render(pixelData);
 
   // rotate
-  ledColor = ledColor.rotate(offset);
-  offset += 1;
+  offset += 10;
 }, 500);
