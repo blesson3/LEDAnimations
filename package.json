@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/blesson3/LEDAnimations#readme",
   "dependencies": {
+    "bases": "^0.2.1",
+    "color": "^2.0.1",
     "rpi-ws281x-native": "^0.8.2"
   }
 }

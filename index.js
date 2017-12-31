@@ -1,6 +1,8 @@
 const NUM_LEDS = 100;
 // const GPIO_PIN = 13;
 
+const Color = require('color');
+
 let ws281x = require('rpi-ws281x-native');
 ws281x.init(NUM_LEDS);
 
@@ -12,15 +14,15 @@ process.on('SIGINT', function () {
   process.nextTick(function () { process.exit(0); });
 });
 
-// ---- animation-loop
-var offset = 0;
-setInterval(function () {
-  var i=NUM_LEDS;
-  while(i--) {
-      pixelData[i] = 0;
-  }
-  pixelData[offset] = 0xffffff;
+const ledColor = Color.rgb(255, 255, 255)
 
-  offset = (offset + 1) % NUM_LEDS;
+// ---- animation-loop
+setInterval(function () {
+  for (let i = 0; i < NUM_LEDS; i++) {
+    pixelData[i] = ledColor.rgbNumber();
+  }
+
+  console.log('Setting color: '+ledColor.rgbNumber());
+
   ws281x.render(pixelData);
-}, 50);
+}, 500);
