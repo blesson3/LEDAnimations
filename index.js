@@ -1,4 +1,4 @@
-const NUM_LEDS = 100;
+const NUM_LEDS = 10;
 // const GPIO_PIN = 13;
 
 const Color = require('color');
@@ -17,6 +17,7 @@ process.on('SIGINT', function () {
 let ledColor = Color.rgb(80, 80, 80)
 
 // ---- animation-loop
+let offset = 1;
 setInterval(function () {
   for (let i = 0; i < NUM_LEDS; i++) {
     pixelData[i] = ledColor.rgbNumber();
@@ -27,5 +28,6 @@ setInterval(function () {
   ws281x.render(pixelData);
 
   // rotate
-  ledColor = ledColor.rotate(20);
+  ledColor = ledColor.rotate(offset);
+  offset += 1;
 }, 500);
