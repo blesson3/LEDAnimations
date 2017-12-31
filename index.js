@@ -31,4 +31,4 @@ setInterval(function () {
   // rotate
   hue += 10;
   hue = hue % 361;
-}, 500);
+}, 50);
