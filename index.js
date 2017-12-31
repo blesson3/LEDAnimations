@@ -14,7 +14,7 @@ process.on('SIGINT', function () {
   process.nextTick(function () { process.exit(0); });
 });
 
-const ledColor = Color.rgb(255, 255, 255)
+let ledColor = Color.rgb(80, 80, 80)
 
 // ---- animation-loop
 setInterval(function () {
@@ -25,4 +25,7 @@ setInterval(function () {
   console.log('Setting color: '+ledColor.rgbNumber());
 
   ws281x.render(pixelData);
+
+  // rotate
+  ledColor = ledColor.rotate(20);
 }, 500);
